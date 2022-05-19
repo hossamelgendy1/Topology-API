@@ -1,16 +1,9 @@
 package TopologyAPI.main.Model.handlers;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Iterator;
-
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -23,8 +16,16 @@ import TopologyAPI.main.Model.TopologyComponent;
 
 public class JsonHandler implements IJsonHandler {
 
-    //constructor
-    public JsonHandler() {
+    private static JsonHandler instance;//to make the class singleton
+
+    private JsonHandler() {
+    }
+
+    public static JsonHandler getInstance() {
+        if (instance == null) {
+            instance = new JsonHandler();
+        }
+        return instance;
     }
 
     @Override
