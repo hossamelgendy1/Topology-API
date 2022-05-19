@@ -3,6 +3,7 @@ package TopologyAPI.main.Model.handlers;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 
 import org.json.simple.JSONArray;
@@ -48,19 +49,19 @@ public class JsonHandler implements IJsonHandler {
             JSONObject component = jsonComponents.get(i) != null ? (JSONObject)jsonComponents.get(i) : new JSONObject();
             
             //get the keys of the component object
-            Iterator<String> keys = component.keySet().iterator();
+            Iterator<?> keys = component.keySet().iterator();
             while(keys.hasNext()) {
-                String key = keys.next();
+                String key = (String)keys.next();
                 if (key.equals("id")) {
                     topologyComponent.setId(component.get(key).toString());
                 } else if (key.equals("type")) {
                     topologyComponent.setType(component.get(key).toString());
                 } else if (key.equals("netlist")) {
                     JSONObject netlist = component.get("netlist") != null ? (JSONObject)component.get("netlist") : new JSONObject();
-                    Iterator<String> netlistKeys = netlist.keySet().iterator();
+                    Iterator<?> netlistKeys = netlist.keySet().iterator();
                     //add the netlist object as key-value pairs to the netlist map
                     while(netlistKeys.hasNext()) {
-                        String netlistKey = netlistKeys.next();
+                        String netlistKey = (String)netlistKeys.next();
                         topologyComponent.getNetlist().put(netlistKey, netlist.get(netlistKey).toString());
                     }
                 } else { //if it gets here, it is the details object
@@ -68,9 +69,9 @@ public class JsonHandler implements IJsonHandler {
                     topologyComponent.setDetailsName(key);
                     //the store the object as a map of key-value pairs
                     JSONObject details = component.get(key) != null ? (JSONObject)component.get(key) : new JSONObject();
-                    Iterator<String> detailsKeys = details.keySet().iterator();
+                    Iterator<?> detailsKeys = details.keySet().iterator();
                     while(detailsKeys.hasNext()) {
-                        String detailsKey = detailsKeys.next();
+                        String detailsKey = (String)detailsKeys.next();
                         topologyComponent.getDetails().put(detailsKey, Double.parseDouble(details.get(detailsKey).toString()));
                     }
                 }
@@ -83,35 +84,40 @@ public class JsonHandler implements IJsonHandler {
 
     @Override
     public void writeJson(ITopology topology, String filePath) throws Exception{
-        JSONObject obj = new JSONObject();
+        HashMap<String, Object> objectMap = new HashMap<String, Object>();
         //add the id to the JSON object
-        obj.put("id", topology.getId());
+        objectMap.put("id", topology.getId());
         //add the array of components to the JSON object
         JSONArray jsonComponents = new JSONArray();
         for (ITopologyComponent component : topology.getComponents()) {
-            JSONObject jsonComponent = new JSONObject();
+            HashMap<String, Object> componentMap = new HashMap<String, Object>();
             //add the id to the JSON object
-            jsonComponent.put("id", component.getId());
+            componentMap.put("id", component.getId());
             //add the type to the JSON object
-            jsonComponent.put("type", component.getType());
+            componentMap.put("type", component.getType());
             //add the netlist to the JSON object
-            JSONObject jsonNetlist = new JSONObject();
+            HashMap<String, Object> netlistMap = new HashMap<String, Object>();
             for (String key : component.getNetlist().keySet()) {
-                jsonNetlist.put(key, component.getNetlist().get(key));
+                netlistMap.put(key, component.getNetlist().get(key));
             }
-            jsonComponent.put("netlist", jsonNetlist);
+            JSONObject jsonNetlist = new JSONObject(netlistMap);
+            componentMap.put("netlist", jsonNetlist);
             //add the details to the JSON object
-            JSONObject jsonDetails = new JSONObject();
+            HashMap<String, Object> detailsMap = new HashMap<String, Object>();
             for (String key : component.getDetails().keySet()) {
-                jsonDetails.put(key, component.getDetails().get(key));
+                detailsMap.put(key, component.getDetails().get(key));
             }
-            jsonComponent.put(component.getDetailsName(), jsonDetails);
+            JSONObject jsonDetails = new JSONObject(detailsMap);
+            componentMap.put(component.getDetailsName(), jsonDetails);
+            //add the component to the array of components
+            JSONObject jsonComponent = new JSONObject(componentMap);
             jsonComponents.add(jsonComponent);
         }
-        obj.put("components", jsonComponents);
+        objectMap.put("components", jsonComponents);
+        JSONObject jsonObject = new JSONObject(objectMap);
         //write the JSON object to a file
         try (FileWriter file = new FileWriter(filePath)) {
-            file.write(obj.toJSONString());
+            file.write(jsonObject.toJSONString());
          }
         
     }
