@@ -18,4 +18,35 @@ public class SystemData implements ISystemData{
         }
         return instance;
     }
+
+    @Override
+    public ITopology getTopology(String topologyID) {
+        for (ITopology topology : topologies) {
+            if (topology.getId().equals(topologyID)) {
+                return topology;
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public ArrayList<ITopology> getTopologies() {
+        return topologies;
+    }
+
+    @Override
+    public void addTopology(ITopology topology) {
+        topologies.add(topology);
+    }
+
+    @Override
+    public boolean removeTopology(String topologyID) {
+        for (ITopology topology : topologies) {
+            if (topology.getId().equals(topologyID)) {
+                topologies.remove(topology);
+                return true;
+            }
+        }
+        return false;
+    }
 }

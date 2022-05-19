@@ -41,4 +41,15 @@ public class Topology implements ITopology{
     public void addComponent(ITopologyComponent component) {
         components.add(component);        
     }
+
+    @Override
+    public ArrayList<ITopologyComponent> getComponentsWithNetlist(String netlistID) {
+        ArrayList<ITopologyComponent> componentsWithNetlist = new ArrayList<ITopologyComponent>();
+        for (ITopologyComponent component : components) {
+            if (component.getNetlist().get("id").equals(netlistID)) {
+                componentsWithNetlist.add(component);
+            }
+        }
+        return componentsWithNetlist;
+    }
 }
